@@ -49,7 +49,7 @@ npx skills add -g shangliy/glowmotion    # global, all projects (~/.claude/skill
 
 ```bash
 git clone https://github.com/shangliy/glowmotion.git
-ln -s "$(pwd)/glowmotion" ~/.claude/skills/glowmotion
+ln -s "$(pwd)/glowmotion/skills/glowmotion" ~/.claude/skills/glowmotion
 ```
 
 Start a new Claude Code session and ask for e.g. *"an animated architecture
@@ -60,10 +60,10 @@ diagram of our checkout system, neon theme"* — or invoke it explicitly with
 ## Usage
 
 ```bash
-# author a semantic graph JSON (see references/graph-format.md), then:
-python3 scripts/layout.py graph.json --render diagram.html
-python3 scripts/check_diagram.py diagram.html          # must print 0 violations
-python3 scripts/check_fidelity.py src.mmd diagram.html # mermaid input only
+# author a semantic graph JSON (see skills/glowmotion/references/graph-format.md), then:
+python3 skills/glowmotion/scripts/layout.py graph.json --render diagram.html
+python3 skills/glowmotion/scripts/check_diagram.py diagram.html          # must print 0 violations
+python3 skills/glowmotion/scripts/check_fidelity.py src.mmd diagram.html # mermaid input only
 ```
 
 Demo outputs live in `examples/` (`arch-neon.html`, `flow-aurora.html`,
