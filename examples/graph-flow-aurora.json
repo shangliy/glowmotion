@@ -1,0 +1,33 @@
+{
+  "mode": "flow",
+  "theme": "aurora",
+  "title": "CI release",
+  "titleHighlight": "pipeline",
+  "subtitle": "Every push replays this path — the glowing dot is one commit's journey",
+  "signature": "@glowmotion",
+  "nodes": [
+    {"id": "start", "label": "push", "shape": "pill"},
+    {"id": "lint", "label": "Lint + typecheck"},
+    {"id": "test", "label": "Unit tests"},
+    {"id": "gate", "label": "All green?", "shape": "decision"},
+    {"id": "build", "label": "Build artifact"},
+    {"id": "stage", "label": "Deploy to staging"},
+    {"id": "smoke", "label": "Smoke suite"},
+    {"id": "prod", "label": "Promote to prod"},
+    {"id": "done", "label": "released", "shape": "pill"}
+  ],
+  "edges": [
+    {"from": "start", "to": "lint"},
+    {"from": "lint", "to": "test"},
+    {"from": "test", "to": "gate"},
+    {"from": "gate", "to": "build", "label": "yes", "kind": "main"},
+    {"from": "gate", "to": "lint", "label": "fix and retry"},
+    {"from": "build", "to": "stage"},
+    {"from": "stage", "to": "smoke"},
+    {"from": "smoke", "to": "prod", "kind": "main"},
+    {"from": "prod", "to": "done"}
+  ],
+  "journeys": [
+    {"hops": [["start", "lint"], ["lint", "test"], ["test", "gate"], ["gate", "build"], ["build", "stage"], ["stage", "smoke"], ["smoke", "prod"], ["prod", "done"]]}
+  ]
+}

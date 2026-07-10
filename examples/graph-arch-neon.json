@@ -1,0 +1,48 @@
+{
+  "mode": "architecture",
+  "theme": "neon",
+  "title": "The internals of",
+  "titleHighlight": "Order Pipeline",
+  "subtitle": "How an order travels from the storefront to fulfilment — glowing dots are requests in flight",
+  "signature": "@glowmotion",
+  "footer": "glowmotion demo · neon theme · deterministic layout",
+  "nodes": [
+    {"id": "web", "label": "Storefront", "sublabel": "Next.js edge", "type": "frontend", "tier": 0},
+    {"id": "mob", "label": "Mobile App", "sublabel": "iOS / Android", "type": "frontend", "tier": 0},
+    {"id": "gw", "label": "API Gateway", "sublabel": "authn · rate limit", "type": "security", "tier": 1},
+    {"id": "orders", "label": "Order Service", "sublabel": "Go · gRPC", "type": "backend", "tier": 2, "group": "vpc"},
+    {"id": "pay", "label": "Payment Service", "sublabel": "PCI zone", "type": "backend", "tier": 2, "group": "vpc"},
+    {"id": "bus", "label": "Kafka: order-events", "type": "bus", "tier": 3, "group": "vpc"},
+    {"id": "fulfil", "label": "Fulfilment Worker", "sublabel": "consumer group", "type": "backend", "tier": 4, "group": "vpc"},
+    {"id": "db", "label": "PostgreSQL", "sublabel": "orders, ledger", "type": "database", "tier": 5, "group": "vpc"},
+    {"id": "cache", "label": "Redis", "sublabel": "session · cart", "type": "database", "tier": 5, "group": "vpc"},
+    {"id": "s3", "label": "Object Storage", "sublabel": "invoices", "type": "cloud", "tier": 6},
+    {"id": "stripe", "label": "Stripe", "sublabel": "external PSP", "type": "external", "tier": 6}
+  ],
+  "edges": [
+    {"from": "web", "to": "gw", "kind": "main"},
+    {"from": "mob", "to": "gw"},
+    {"from": "gw", "to": "orders", "kind": "main", "label": "gRPC"},
+    {"from": "gw", "to": "pay", "kind": "auth", "label": "authz"},
+    {"from": "orders", "to": "bus", "kind": "async", "label": "publish"},
+    {"from": "pay", "to": "bus", "kind": "async"},
+    {"from": "bus", "to": "fulfil", "kind": "async", "label": "consume"},
+    {"from": "orders", "to": "db"},
+    {"from": "orders", "to": "cache"},
+    {"from": "fulfil", "to": "db"},
+    {"from": "fulfil", "to": "s3", "label": "invoice PDF"},
+    {"from": "pay", "to": "stripe", "kind": "auth", "label": "charge"}
+  ],
+  "groups": [
+    {"id": "vpc", "label": "Production VPC", "kind": "region"}
+  ],
+  "journeys": [
+    {"hops": [["web", "gw"], ["gw", "orders"], ["orders", "bus"], ["bus", "fulfil"], ["fulfil", "db"]]},
+    {"hops": [["gw", "pay"], ["pay", "stripe"]]}
+  ],
+  "summary": [
+    {"accent": "cyan", "title": "Request path", "items": ["storefront → gateway → order service", "gRPC with authn at the edge"]},
+    {"accent": "violet", "title": "Event backbone", "items": ["orders publish to Kafka", "fulfilment consumes asynchronously"]},
+    {"accent": "rose", "title": "Boundaries", "items": ["stateful services inside the VPC", "Stripe stays external"]}
+  ]
+}
